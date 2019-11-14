@@ -1,0 +1,164 @@
+---
+title: "Biostats with R"
+subtitle: "A speedy primer on the statistical Swiss Army knife"
+author: "Aditya Srinivasulu"
+date: "10 January 2020"
+output: 
+  tufte::tufte_html:
+link-citations: yes
+header-includes: 
+- \usepackage{float} 
+- \floatplacement{figure}{H}
+bibliography: "References.bib"
+csl: "J:/WorkStuff/harvard-cite-them-right.csl"
+---
+
+# What is R?
+
+Defined by the R Project for Statistical Computing as a language and environment for statistical computing and graphics [@R-base], R is an open-source free language primarily designed to be used to perform statistics.
+
+It is a suite of tools and facilities for data manipulation, analysis, and visualisation. The three main features of R are:
+
+  * It is an effective data handling and manipulation facility
+
+  * It is a modular collection of functions and packages that allow processing and analysis
+
+  * It is a simple, readable, yet effective and fully-functioning programming language
+
+In recent times, R has seen a surge in popularity. Rexer, a company which handle big data analysis and also conduct annual surveys of data scientists worldwide, found in 2015 that R is the most common primary-use statistical package, and this has remained the case since [@rexer2015].
+
+***
+
+# Starting off in R
+
+To begin working in R, we have to first install R and RStudio, a helpful Integrated Development Environment (IDE, essentially a software that makes it easier to work with a programming language).
+
+## Installing R
+First, head to the Comprehensive R Archive Network (CRAN) website^[https://cloud.r-project.org/] and click the link to download the appropriate version of R for your operating system.
+
+**On Windows:**
+
+* _Ensure you download the **base** version!_
+
+* When the file is downloaded, find it in the Downloads section of your browser, and click it to open. Alternatively, find it in the Downloads folder of your computer, and double-click it to open.
+
+* Follow the default instructions and complete the installation.
+
+**On Mac:**
+
+* Download the .pkg file
+
+* When the file is downloaded, find it in the Downloads section of your browser, and click it to open. Alternatively, find it in the Downloads folder of your computer, and double-click it to open.
+
+* Follow the default instructions and complete the installation.
+
+**On Linux:**
+
+Follow Jason French's guide^[https://www.jason-french.com/blog/2013/03/11/installing-r-in-linux/] on how to install R on Linux.
+
+
+## Installing RStudio
+
+Once you've installed R, head to the RStudio download page^[https://rstudio.com/products/rstudio/download/] and scroll down till you find the list of "Installers for Supported Platforms" for RStudio Desktop. Download the appropriate installer and run it, keeping everything to default.
+
+***
+
+# 'Speaking' in R
+
+## Objects
+
+R treats data in the form of objects, called **vectors** (we will refer to them as objects, however). These objects can have values or data assigned to them.
+
+R can be used as a complex calculator:
+
+```{r}
+1 + 26 * (152 / 3)
+```
+
+And you can create new objects using the assignment symbol^[The shortcut in RStudio for this is `Alt + -`], `<-` 
+
+```{r}
+object <- 2+2
+data <- "This object contains some data"
+```
+
+You can always remember that `<-` means `gets`. So `object <- value` is read as `object gets value`.
+
+You can call objects that you have assigned data to by typing in their name:
+
+```{r}
+object
+data
+```
+```{r echo = FALSE}
+rm(object)
+rm(data)
+```
+
+Object names can be anything as long as they start with a letter and have no special characters in them except `.` and `_`. I personally use a mix of `snake_case_object_names` and `CamelCaseObjectNames` but it's good to be consistent.
+
+Also, very importantly: **R is case-sensitive**. In the words of Hadley Wickham, there is an implied contract between you and R - it will do all the tedious computation for you, but in return you must be completely precise in your instructions [@WickhamR4DS]. 
+
+## Functions
+
+R interprets, manipulates, and analyses data using **functions**. Functions are typically in the format `function(object, arguments)` where `function` is the name of the function (e.g. `mean()`, `sum()`), `object` is the name of the object which holds the data in question, and `arguments` are any arguments that the function requires to... function.
+
+For instance, `rnorm` is a function that generates a random normal distribution. It doesn't need an object, but it does need three arguments: `n` for the sample size, `mean` for the mean of the distribution, and `sd` for the standard deviation.
+
+```{r}
+rnorm(n = 4, mean = 3.4, sd = 1)
+```
+
+However, in order to work with the results of a function downstream, we must store it in an object. We use the assigner `<-` for that. Remember that the assigner is read as `gets`.
+
+```{r}
+normal <- rnorm(n = 300, mean = 24, sd = 6)
+```
+
+After storing data in an object, we can analyse it further - let's use the `mean()` and `sd()` functions to find the mean and sd of our random normal distribution. Then, let's use the `boxplot()` function to make a simple boxplot of our distribution.
+
+```{r echo = FALSE, fig.margin = TRUE, fig.cap = "A simple box plot using the 'base' graphics in R", fig.height=8, fig.width=8}
+boxplot(normal)
+```
+```{r}
+mean(normal)
+sd(normal)
+```
+```{r fig.keep = "none"}
+boxplot(normal)
+```
+```{r echo = FALSE}
+rm(normal)
+```
+
+We'll get to visualising data in a bit.
+
+## Packages
+
+Functions and public-assessible data are collected together into packages, which are freely available online (either on CRAN or GitHub, a popular software development website).
+
+In order to use functions in a particular package, you must install it first using `install.packages('PackageName')`. 
+
+Once the package is installed, you have to let R know you want to use it by running `library(PackageName)`^[*Nb.* We are using double quotation marks with `install.packages()` and none with `library()`].
+
+If you want to uninstall a package, you can use `remove.packages('PackageName')`.
+
+***
+
+# The Workflow in R - Reading or Generating Data
+
+## Importing data from files
+
+R can read data from all major file formats (including .csv, .txt, .tsv, .xls, .sav) and preserves them in the environment as data frames.
+
+For example, the function read.csv is used to read a csv file. We'll read a publicly available csv, but you can specify a path to your own file (more on that later).
+
+`head()` is a function that displays the head (i.e. the first few rows, usually 6) of the data. This is to save space and make sure we don't display huge datasets in the handout!
+
+```{r}
+file <- read.csv('https://people.sc.fsu.edu/~jburkardt/data/csv/biostats.csv', header = T)
+head(file)
+```
+
+## Visualisation
+
